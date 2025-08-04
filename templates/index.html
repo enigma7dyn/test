@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Электронная библиотека</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="index-body">
+    <div class="index-container">
+        <div class="index-logo">📚</div>
+        <h1>Электронная библиотека</h1>
+        <p class="index-subtitle">Выберите тип входа в систему</p>
+        
+        <div class="login-options">
+            <a href="{% url 'login' %}" class="login-btn user-btn">
+                👤 Вход для пользователей
+            </a>
+            
+            <div class="divider">
+                <span></span>
+            </div>
+            
+            <a href="{% url 'admin_login' %}" class="login-btn admin-btn">
+                🔧 Вход для сотрудников
+            </a>
+        </div>
+        
+        <div class="github-link">
+            <a href="https://github.com/enigma7dyn/test" target="_blank" class="github-btn">
+                Ссылка на гит
+            </a>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактировать рецензию</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="dashboard-body">
+    <div class="header">
+        <div class="welcome">
+            ✏️ Редактировать рецензию
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'book_detail' review.book.id %}" class="btn-small btn-secondary">← Назад к книге</a>
+            <a href="{% url 'index' %}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="edit-review-container">
+        <div class="book-info-summary">
+            <h3>📚 {{ review.book.title }}</h3>
+            <p>Автор: {{ review.book.author }}</p>
+        </div>
+        
+        <form method="post" class="edit-review-form" id="editReviewForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="rating">Оценка *</label>
+                <select name="rating" id="rating" required>
+                    <option value="5" {% if review.rating == 5 %}selected{% endif %}>5 - Отлично</option>
+                    <option value="4" {% if review.rating == 4 %}selected{% endif %}>4 - Хорошо</option>
+                    <option value="3" {% if review.rating == 3 %}selected{% endif %}>3 - Удовлетворительно</option>
+                    <option value="2" {% if review.rating == 2 %}selected{% endif %}>2 - Плохо</option>
+                    <option value="1" {% if review.rating == 1 %}selected{% endif %}>1 - Очень плохо</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="text">Текст рецензии *</label>
+                <textarea name="text" id="text" rows="6" required>{{ review.text }}</textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-small btn-primary">💾 Сохранить изменения</button>
+                <a href="{% url 'book_detail' review.book.id %}" class="btn-small btn-secondary">❌ Отмена</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Функция для обновления CSRF токена
+        function updateCSRFToken() {
+            fetch('{% url "edit_review" review.id %}')
+                .then(response => {
+                    const token = document.querySelector('[name=csrfmiddlewaretoken]');
+                    if (token) {
+                        const newToken = response.headers.get('X-CSRFToken');
+                        if (newToken) {
+                            token.value = newToken;
+                        }
+                    }
+                })
+                .catch(error => console.error('Ошибка обновления CSRF токена:', error));
+        }
+
+        // Обновляем CSRF токен каждые 5 минут
+        setInterval(updateCSRFToken, 300000);
+
+        // Обновляем токен при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCSRFToken();
+        });
+    </script>
+</body>
+</html> 

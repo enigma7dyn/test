@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить книгу</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="dashboard-body">
+    <div class="header">
+        <div class="welcome">
+            ➕ Добавить новую книгу
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'user_dashboard' %}" class="btn-small btn-secondary">← Назад к списку</a>
+            <a href="{% url 'index' %}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+    
+    <div class="add-book-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post" class="add-book-form" id="addBookForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="title">Название книги *</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="author">Автор *</label>
+                <input type="text" id="author" name="author" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="published_date">Дата публикации *</label>
+                <input type="date" id="published_date" name="published_date" required>
+            </div>
+            
+            <button type="submit" class="btn">📚 Добавить книгу</button>
+        </form>
+    </div>
+
+    <script>
+        
+        function updateCSRFToken() {
+            fetch('{% url "add_book" %}')
+                .then(response => {
+                    const token = document.querySelector('[name=csrfmiddlewaretoken]');
+                    if (token) {
+                        const newToken = response.headers.get('X-CSRFToken');
+                        if (newToken) {
+                            token.value = newToken;
+                        }
+                    }
+                })
+                .catch(error => console.error('Ошибка обновления CSRF токена:', error));
+        }
+
+        
+        setInterval(updateCSRFToken, 300000);
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCSRFToken();
+        });
+    </script>
+</body>
+</html> 

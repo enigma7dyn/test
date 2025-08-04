@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ book.title }} - Детали книги</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="dashboard-body">
+    <div class="header">
+        <div class="welcome">
+            📚 {{ book.title }}
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'favorites_list' %}" class="btn-small btn-secondary">❤️ Избранное</a>
+            <a href="{% url 'add_book' %}" class="btn-small btn-primary">➕ Добавить книгу</a>
+            <a href="{% url 'user_dashboard' %}" class="btn-small btn-secondary">← Назад к списку</a>
+            <a href="{% url 'index' %}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="book-detail-container">
+        <div class="book-main-info">
+            <div class="book-cover">
+                <div class="cover-placeholder">📖</div>
+            </div>
+            <div class="book-info">
+                <h1 class="book-title">{{ book.title }}</h1>
+                <div class="book-author">Автор: {{ book.author }}</div>
+                <div class="book-date">Дата публикации: {{ book.published_date }}</div>
+                <div class="book-rating">
+                    <span class="rating-stars">
+                        {% if book.average_rating >= 1 %}⭐{% endif %}
+                        {% if book.average_rating >= 2 %}⭐{% endif %}
+                        {% if book.average_rating >= 3 %}⭐{% endif %}
+                        {% if book.average_rating >= 4 %}⭐{% endif %}
+                        {% if book.average_rating >= 5 %}⭐{% endif %}
+                    </span>
+                    <span class="rating-text">{{ book.average_rating|floatformat:1 }}/5.0</span>
+                </div>
+                <div class="book-actions">
+                    {% if is_favorite %}
+                        <a href="{% url 'remove_from_favorites' book.id %}" class="btn-small btn-danger">❤️ Удалить из избранного</a>
+                    {% else %}
+                        <a href="{% url 'add_to_favorites' book.id %}" class="btn-small btn-secondary">🤍 Добавить в избранное</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="reviews-section">
+            <h2>📝 Рецензии ({{ book.reviews.count }})</h2>
+            
+            {% if not user_review %}
+                <div class="review-form-container">
+                    <h3>✍️ Написать рецензию</h3>
+                    <form method="post" action="{% url 'add_review' book.id %}" class="review-form" id="reviewForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="rating">Оценка *</label>
+                            <select name="rating" id="rating" required>
+                                <option value="">Выберите оценку</option>
+                                <option value="5">5 - Отлично</option>
+                                <option value="4">4 - Хорошо</option>
+                                <option value="3">3 - Удовлетворительно</option>
+                                <option value="2">2 - Плохо</option>
+                                <option value="1">1 - Очень плохо</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="text">Текст рецензии *</label>
+                            <textarea name="text" id="text" rows="4" required placeholder="Напишите вашу рецензию..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-small btn-primary">📝 Опубликовать рецензию</button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="user-review-notice">
+                    <p>✅ Вы уже написали рецензию на эту книгу</p>
+                </div>
+            {% endif %}
+            
+            {% if book.reviews.all %}
+                <div class="reviews-list">
+                    {% for review in book.reviews.all %}
+                        <div class="review-card">
+                            <div class="review-header">
+                                <span class="review-author">{{ review.user }}</span>
+                                <span class="review-date">{{ review.created_at|date:"d.m.Y" }}</span>
+                            </div>
+                            <div class="review-rating">
+                                Оценка: 
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}⭐{% else %}☆{% endif %}
+                                {% endfor %}
+                                <span class="rating-number">({{ review.rating }}/5)</span>
+                            </div>
+                            <div class="review-text">{{ review.text }}</div>
+                            
+                            
+                            {% if review.user == user.username %}
+                                <div class="review-actions">
+                                    <a href="{% url 'edit_review' review.id %}" class="btn-small btn-secondary">✏️ Редактировать</a>
+                                    <a href="{% url 'delete_review' review.id %}" class="btn-small btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту рецензию?')">🗑️ Удалить</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-reviews">
+                    <p>📝 Пока нет рецензий на эту книгу. Будьте первым!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html> 

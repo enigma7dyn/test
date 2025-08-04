@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель пользователя</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="dashboard-body">
+    <div class="header">
+        <div class="welcome">
+            Добро пожаловать, {{ user.username }}! 👤
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'favorites_list' %}" class="btn-small btn-secondary">❤️ Избранное</a>
+            <a href="{% url 'add_book' %}" class="btn-small btn-primary">➕ Добавить книгу</a>
+            <a href="{% url 'index' %}" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="books-container">
+        {% if books %}
+            <div class="books-grid">
+                {% for book in books %}
+                    <div class="book-card">
+                        <div class="book-cover">
+                            <div class="cover-placeholder">📖</div>
+                        </div>
+                        <div class="book-info">
+                            <h3 class="book-title">{{ book.title }}</h3>
+                            <div class="book-author">{{ book.author }}</div>
+                            <div class="book-date">{{ book.published_date }}</div>
+                            <div class="book-rating">
+                                <span class="rating-stars">
+                                    {% if book.average_rating >= 1 %}⭐{% endif %}
+                                    {% if book.average_rating >= 2 %}⭐{% endif %}
+                                    {% if book.average_rating >= 3 %}⭐{% endif %}
+                                    {% if book.average_rating >= 4 %}⭐{% endif %}
+                                    {% if book.average_rating >= 5 %}⭐{% endif %}
+                                </span>
+                                <span class="rating-text">{{ book.average_rating|floatformat:1 }}/5.0</span>
+                            </div>
+                            <div class="book-reviews">Рецензий: {{ book.reviews.count }}</div>
+                        </div>
+                        <div class="book-actions">
+                            <a href="{% url 'book_detail' book.id %}" class="btn-small btn-primary">👁️ Просмотр</a>
+                            <a href="{% url 'add_to_favorites' book.id %}" class="btn-small btn-secondary">❤️ В избранное</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📚</div>
+                <h2>Книги не найдены</h2>
+                <p>В данный момент в системе нет доступных книг.</p>
+                <a href="{% url 'add_book' %}" class="btn btn-primary">➕ Добавить первую книгу</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html> 
